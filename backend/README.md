@@ -139,11 +139,16 @@ Server runs at: `http://localhost:3000`
 # Postman Instructions
 
 1. Open Postman and create a new POST request
-2. Copy the URL and body JSON for each endpoint
-3. Send requests and check responses
+2. Set headers: Key/Content-type. Value/application/json
+3. Copy the URL and body JSON for each endpoint
+4. Send requests and check responses
 
 
 # Postman Example Tests
+Headers:
+![headers](https://github.com/user-attachments/assets/00404079-d5e0-4e89-bd31-bfe0c7fef349)
+
+
 Login:
 ![postman login](https://github.com/user-attachments/assets/b69f249d-0ff5-45f5-98a0-a652c5ccdc35)
 

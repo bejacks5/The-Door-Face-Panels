@@ -141,3 +141,14 @@ Server runs at: `http://localhost:3000`
 1. Open Postman and create a new POST request
 2. Copy the URL and body JSON for each endpoint
 3. Send requests and check responses
+
+
+# Postman Example Tests
+Login:
+![postman login](https://github.com/user-attachments/assets/b69f249d-0ff5-45f5-98a0-a652c5ccdc35)
+
+MFA:
+![mfa postman](https://github.com/user-attachments/assets/a2f35514-9857-4d0b-96ab-413a4549371f)
+
+Logout:
+![logout postman](https://github.com/user-attachments/assets/d8a8e288-6097-404e-be99-64ce40534e7f)

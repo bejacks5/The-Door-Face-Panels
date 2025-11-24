@@ -1,0 +1,22 @@
+Liveness Check and Login/MFA Integration
+
+Overview
+The goal of this feature is to add a simple liveness check before a user can log in. After liveness is passed, the script connects to Student 1’s backend and completes the normal login → MFA → session flow.
+
+Files Included
+- liveness_module.py
+  - Runs a basic text-based liveness check.
+  - Prompts the user to type "blink".
+  - Returns either LIVENESS_PASSED or FAILED.
+
+⦁	login_with_liveness.py
+  - Integrates the liveness check with the backend.
+  - Sends a login request to `/login` with `livenessVerified = True`.
+  - If MFA is required, it automatically calls `/mfa/verify`.
+  - Prints the final session token if authentication succeeds.
+
+Requirements
+Backend (Student 1)
+The Node.js backend must be running
+
+

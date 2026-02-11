@@ -14,6 +14,7 @@ If you want to emulate this using Android Studio, make sure you update your envi
 - In the user variables, edit the path variable, add "%ANDROID_HOME%\platform-tools" and "%ANDROID_HOME%\emulator"
 For XCode, nothing else is required except just the XCode app.
 
+## Running the App:
 Once the repository is cloned, cd into the frontend directory.
 Run "npm install", to install missing dependencies.
 Run "npx expo start", to start the app.

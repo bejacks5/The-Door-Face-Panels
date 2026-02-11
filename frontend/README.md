@@ -2,9 +2,9 @@ README NOT FINISHED/NOT TESTED
 
 ## Prerequisites:
 - Node js - visit https://nodejs.org/en to install.
-- Android studio (optional, for the android emulator, only for windows)
-- XCode (optional, for the ios emulator, only for mac)
-- Expo go (optional, to run the app on your mobile device
+- Android studio (optional, for the android emulator, only for windows) - visit https://developer.android.com/studio to install.
+- XCode (optional, for the ios emulator, only for mac) - available in app store.
+- Expo go (optional, to run the app on your mobile device - available in app store/google play store.
 
 ## Emulation:
 If you want to emulate this using Android Studio, make sure you update your environment variables.

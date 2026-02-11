@@ -16,11 +16,11 @@ If you want to emulate this using Android Studio, make sure you update your envi
 For XCode, nothing else is required except just the XCode app.
 
 ## Running the App:
-Once the repository is cloned, cd into the frontend directory.
-Run "npm install", to install missing dependencies.
-Run "npx expo start", to start the app.
+- Once the repository is cloned, cd into the frontend directory.
+- Run "npm install", to install missing dependencies.
+- Run "npx expo start", to start the app.
 
 From there, you are given options for the app:
-press "a" to launch the android emulator
-press "i" to launch the ios emulator
-press "w" to launch the web server emulator
+- press "a" to launch the android emulator
+- press "i" to launch the ios emulator
+- press "w" to launch the web server emulator

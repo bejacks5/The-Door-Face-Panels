@@ -12,6 +12,7 @@ If you want to emulate this using Android Studio, make sure you update your envi
 - Click on "environment variables"
 - Add a new system variable, name="ANDROID_HOME", path="C:\Users\YOUR_NAME\AppData\Local\Android\Sdk" (path should be wherever the path to your \Android\Sdk folder is... default is in AppData)
 - In the user variables, edit the path variable, add "%ANDROID_HOME%\platform-tools" and "%ANDROID_HOME%\emulator"
+
 For XCode, nothing else is required except just the XCode app.
 
 ## Running the App:

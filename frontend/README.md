@@ -1,5 +1,7 @@
 README NOT FINISHED/NOT TESTED
 
+Emulation is not required, running it on the web server works fine, but looks clunky.
+
 ## Prerequisites:
 - Node js - visit https://nodejs.org/en to install.
 - Android studio (optional, for the android emulator, only for windows) - visit https://developer.android.com/studio to install.

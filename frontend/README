@@ -1,1 +1,15 @@
+README NOT FINISHED/NOT TESTED
 
+Prerequisites:
+Node js - visit "https://nodejs.org/en" to install.
+Android studio (optional, for the android emulator, only for windows)
+XCode (optional, for the ios emulator, only for mac)
+
+Once the repository is cloned, cd into the frontend directory.
+Run "npm install", to install missing dependencies.
+Run "npx expo start", to start the app.
+
+From there, you are given options for the app:
+press "a" to launch the android emulator
+press "i" to launch the ios emulator
+press "w" to launch the web server emulator

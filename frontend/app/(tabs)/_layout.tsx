@@ -41,7 +41,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="Security"
+        name="security"
         options={{
           title: "Security",
           tabBarLabel: "Security",

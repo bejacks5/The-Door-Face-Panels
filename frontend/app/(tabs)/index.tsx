@@ -144,6 +144,13 @@ export default function Index() {
   });
   const [tempPanelSettings, setTempPanelSettings] = useState<PanelSettings>(panelSettings);
 
+  const toggleLock = () => {
+    setStatus((prev) => ({
+      ...prev,
+      door: prev.door === "Locked" ? "Unlocked" : "Locked",
+    }));
+  };
+
   return (
     <ScrollView style={styles.container}
       contentContainerStyle={{paddingBottom: 40}}
@@ -197,15 +204,17 @@ export default function Index() {
       <View style={styles.lockSection}>
         <Text style={styles.lockLabel}>{lockIsLocked ? "LOCKED" : "UNLOCKED"}</Text>
 
-        <View style={styles.lockOuter}>
-          <View style={styles.lockInner}>
-            <MaterialCommunityIcons
-              name={lockIsLocked ? "lock" : "lock-open-variant"}
-              size={44}
-              color={lockIsLocked ? "#2ecc71" : "#f1c40f"}
-            />
+        <Pressable onPress={toggleLock} hitSlop={12}>
+          <View style={styles.lockOuter}>
+            <View style={styles.lockInner}>
+              <MaterialCommunityIcons
+                name={lockIsLocked ? "lock" : "lock-open-variant"}
+                size={44}
+                color={lockIsLocked ? "#2ecc71" : "#f1c40f"}
+              />
+            </View>
           </View>
-        </View>
+        </Pressable>
 
         <Text style={styles.lastOpened}>Last opened at 2:03 AM by Ayush</Text>
       </View>

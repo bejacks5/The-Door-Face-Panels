@@ -69,33 +69,37 @@ function FrontPanel({
 }) {
   return (
     <View style={styles.frontPanelOverlay}>
-      {/* Camera */}
-      {settings.camera && (
-        <View>
-          <Text>Camera is active !</Text>
-        </View>
-      )}
+      <View style={styles.frontPanelTop}>
+        {/* Camera */}
+        {settings.camera && (
+          <View>
+            <Text>Camera is active !</Text>
+          </View>
+        )}
 
-      {/* Doorbell */}
-      {settings.doorbell && (
-        <View>
-          <Text>Doorbell is active !</Text>
-        </View>
-      )}
+        {/* Doorbell */}
+        {settings.doorbell && (
+          <View>
+            <Text>Doorbell is active !</Text>
+          </View>
+        )}
+      </View>
 
-      {/* Package Message */}
-      {settings.packageMessage && (
-        <View>
-          <Text>Package Message: Placeholder</Text>
-        </View>
-      )}
+      <View style={styles.frontPanelCenter}>
+        {/* Package Message */}
+        {settings.packageMessage && (
+          <View>
+            <Text>Package Message: Placeholder</Text>
+          </View>
+        )}
 
-      {/* Greeting Message */}
-      {settings.greetingMessage && (
-        <View>
-          <Text>Greeting Message: Placeholder</Text>
-        </View>
-      )}
+        {/* Greeting Message */}
+        {settings.greetingMessage && (
+          <View>
+            <Text>Greeting Message: Placeholder</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -124,7 +128,11 @@ function PanelSettingsEditor({
           }/>
 
           <Text>
-            {key}
+            {key
+              .replace(/([A-Z])/g, ' $1')
+              .toLowerCase()
+              .replace(/^./, s => s.toUpperCase())
+            }
           </Text>
         </View>
       ))}
@@ -386,6 +394,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 20,
   },
+  frontPanelTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  frontPanelCenter: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "#ffffff",
@@ -399,15 +416,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalSaveButton: {
-    marginTop: 20,
+    marginTop: 10,
     backgroundColor: "#4a6cb7",
+    padding: 10,
+    borderRadius: 15,
+    alignItems: "center",
   },
   modalSaveText: {
     color: "#ffffff",
   },
   modalCancelButton: {
-    marginTop: 20,
+    marginTop: 10,
     backgroundColor: "#aeaeae",
+    padding: 10,
+    borderRadius: 15,
+    alignItems: "center",
   },
   modalCancelText: {
     color: "#000000",

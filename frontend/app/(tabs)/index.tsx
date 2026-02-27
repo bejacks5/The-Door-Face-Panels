@@ -5,7 +5,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 type DoorState = "Locked" | "Unlocked";
 type OnlineState = "Online" | "Offline";
 type AlarmState = "On" | "Off";
-type TempState = `${number}°C`;
+type TempState = `${number}°F`;
 
 type Status = {
   door: DoorState;
@@ -31,7 +31,7 @@ function randomStatus(): Status {
     door: pick(["Locked", "Unlocked"]),
     camera: pick(["Online", "Offline"]),
     alarm: pick(["On", "Off"]),
-    temp: `${tempNum}°C`,
+    temp: `${tempNum}°F`,
   };
 }
 

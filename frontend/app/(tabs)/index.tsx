@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image, ScrollView, Modal, Switch } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 type DoorState = "Locked" | "Unlocked";
@@ -14,6 +14,13 @@ type Status = {
   temp: TempState;
 };
 
+type PanelSettings = {
+  camera: boolean;
+  doorbell: boolean;
+  packageMessage: boolean;
+  greetingMessage: boolean;
+}
+
 function pick<T>(arr: T[]) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -24,7 +31,7 @@ function randomStatus(): Status {
     door: pick(["Locked", "Unlocked"]),
     camera: pick(["Online", "Offline"]),
     alarm: pick(["On", "Off"]),
-    temp: `${tempNum}°F`,
+    temp: `${tempNum}°C`,
   };
 }
 
@@ -55,12 +62,93 @@ function StatusCard({
   );
 }
 
+function FrontPanel({
+  settings,
+}: {
+  settings: PanelSettings
+}) {
+  return (
+    <View style={styles.frontPanelOverlay}>
+      {/* Camera */}
+      {settings.camera && (
+        <View>
+          <Text>Camera is active !</Text>
+        </View>
+      )}
+
+      {/* Doorbell */}
+      {settings.doorbell && (
+        <View>
+          <Text>Doorbell is active !</Text>
+        </View>
+      )}
+
+      {/* Package Message */}
+      {settings.packageMessage && (
+        <View>
+          <Text>Package Message: Placeholder</Text>
+        </View>
+      )}
+
+      {/* Greeting Message */}
+      {settings.greetingMessage && (
+        <View>
+          <Text>Greeting Message: Placeholder</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function PanelSettingsEditor({
+  settings,
+  newSettings,
+}: {
+  settings: PanelSettings,
+  newSettings: React.Dispatch<React.SetStateAction<PanelSettings>>;
+}) {
+  return (
+    <View>
+      {Object.entries(settings).map(([key, value]) => (
+        <View 
+          key={key}
+          style={styles.frontPanelEditorList}
+        > 
+          <Switch
+            value={value}
+            onValueChange={(newValue) =>
+              newSettings((prev) => ({
+                ...prev,
+                [key]: newValue
+              }))
+          }/>
+
+          <Text>
+            {key}
+          </Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
 export default function Index() {
   const [status, setStatus] = useState<Status>(() => randomStatus());
   const lockIsLocked = useMemo(() => status.door === "Locked", [status.door]);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [panelSettings, setPanelSettings] = useState<PanelSettings>({
+    camera: false,
+    doorbell: false,
+    packageMessage: false,
+    greetingMessage: false,
+  });
+  const [tempPanelSettings, setTempPanelSettings] = useState<PanelSettings>(panelSettings);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}
+      contentContainerStyle={{paddingBottom: 40}}
+      showsVerticalScrollIndicator={false}
+    >
 
       {/* Header */}
       <View style={styles.headerRow}>
@@ -78,6 +166,22 @@ export default function Index() {
         />
         <View style={styles.previewLabel}>
           <Text style={styles.previewLabelText}>Front Door Camera</Text>
+        </View>
+      </View>
+
+      {/* Front Panel Preview */}
+      <View style={styles.previewWrap}>
+        <FrontPanel settings={panelSettings}/>
+        <View style={styles.previewLabel}>
+          <Text style={styles.previewLabelText}>Front Panel Preview</Text>
+        </View>
+        <View style={styles.previewLabelRight}>
+          <Pressable onPress={() => {
+            setTempPanelSettings(panelSettings);
+            setEditModalVisible(true);
+          }}>
+            <Text style={styles.previewLabelText}>Edit</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -106,7 +210,45 @@ export default function Index() {
         <Text style={styles.lastOpened}>Last opened at 2:03 AM by Ayush</Text>
       </View>
 
-    </View>
+      {/* Front Door Panel Control */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalOverlay}>
+            <Text style={styles.headerTitle}>Front Panel Control</Text>
+
+            {/* Front Panel Display*/}
+            <FrontPanel settings={tempPanelSettings}></FrontPanel>
+
+            {/* Front Panel Content Control List */}
+            <PanelSettingsEditor 
+              settings={tempPanelSettings}
+              newSettings={setTempPanelSettings}
+            />
+
+            {/* Save Button */}
+            <Pressable
+              style={styles.modalSaveButton}
+              onPress={() => {
+                setPanelSettings(tempPanelSettings);
+                setEditModalVisible(false);
+            }}>
+              <Text style={styles.modalSaveText}>Save</Text>
+            </Pressable>
+
+            {/* Cancel Button*/}
+            <Pressable 
+              style={styles.modalCancelButton}
+              onPress={() => setEditModalVisible(false)}
+            >
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </Pressable>
+        </View>
+      </Modal>
+
+    </ScrollView>
   );
 }
 
@@ -144,6 +286,15 @@ const styles = StyleSheet.create({
   previewLabel: {
     position: "absolute",
     left: 10,
+    top: 10,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  previewLabelRight: {
+    position: "absolute",
+    right: 10,
     top: 10,
     backgroundColor: "rgba(0,0,0,0.45)",
     paddingHorizontal: 10,
@@ -217,5 +368,45 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: "#666",
     fontSize: 12,
+  },
+  frontPanelOverlay: {
+    width: "95%",
+    height: 200,
+    padding: 16,
+    backgroundColor: "#c8c2c2",
+    borderRadius: 10,
+    marginVertical: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  modalSaveButton: {
+    marginTop: 20,
+    backgroundColor: "#4a6cb7",
+  },
+  modalSaveText: {
+    color: "#ffffff",
+  },
+  modalCancelButton: {
+    marginTop: 20,
+    backgroundColor: "#aeaeae",
+  },
+  modalCancelText: {
+    color: "#000000",
+  },
+  frontPanelEditorList: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingVertical: 8,
   },
 });

@@ -1,11 +1,111 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+
+type DoorState = "Locked" | "Unlocked";
+type OnlineState = "Online" | "Offline";
+type AlarmState = "On" | "Off";
+type TempState = `${number}°C`;
+
+type Status = {
+  door: DoorState;
+  camera: OnlineState;
+  alarm: AlarmState;
+  temp: TempState;
+};
+
+function pick<T>(arr: T[]) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function randomStatus(): Status {
+  const tempNum = pick([80, 70, 60, 50, 40]);
+  return {
+    door: pick(["Locked", "Unlocked"]),
+    camera: pick(["Online", "Offline"]),
+    alarm: pick(["On", "Off"]),
+    temp: `${tempNum}°F`,
+  };
+}
+
+function dotColor(label: keyof Status, value: string) {
+  if (label === "door") return value === "Locked" ? "#2ecc71" : "#f1c40f";
+  if (label === "camera") return value === "Online" ? "#2ecc71" : "#95a5a6";
+  if (label === "alarm") return value === "On" ? "#2ecc71" : "#95a5a6";
+  return "#f1c40f";
+}
+
+function StatusCard({
+  title,
+  dot,
+}: {
+  title: string;
+  dot: string;
+}) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardTopRow}>
+        <View style={[styles.dot, { backgroundColor: dot }]} />
+        <View style={{ flex: 1 }} />
+        <Ionicons name="eye-outline" size={18} color="#cfd3da" />
+      </View>
+
+      <Text style={styles.cardTitle}>{title}</Text>
+    </View>
+  );
+}
 
 export default function Index() {
+  const [status, setStatus] = useState<Status>(() => randomStatus());
+  const lockIsLocked = useMemo(() => status.door === "Locked", [status.door]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.content}>Door Face Panels Home Page</Text>
-      
+
+      {/* Header */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle}>My Home</Text>
+        <Pressable onPress={() => setStatus(randomStatus())}>
+          <Ionicons name="person-circle-outline" size={28} color="#111" />
+        </Pressable>
+      </View>
+
+      {/* Camera Preview */}
+      <View style={styles.previewWrap}>
+        <Image
+          source={{ uri: "https://via.placeholder.com/1200x700.png?text=Front+Door+Camera" }}
+          style={styles.previewImg}
+        />
+        <View style={styles.previewLabel}>
+          <Text style={styles.previewLabelText}>Front Door Camera</Text>
+        </View>
+      </View>
+
+      {/* Status Cards */}
+      <View style={styles.grid}>
+        <StatusCard title={`Door ${status.door}`} dot={dotColor("door", status.door)} />
+        <StatusCard title={`Camera ${status.camera}`} dot={dotColor("camera", status.camera)} />
+        <StatusCard title={`Alarming ${status.alarm}`} dot={dotColor("alarm", status.alarm)} />
+        <StatusCard title={`${status.temp} Temp`} dot={dotColor("temp", status.temp)} />
+      </View>
+
+      {/* Lock Section */}
+      <View style={styles.lockSection}>
+        <Text style={styles.lockLabel}>{lockIsLocked ? "LOCKED" : "UNLOCKED"}</Text>
+
+        <View style={styles.lockOuter}>
+          <View style={styles.lockInner}>
+            <MaterialCommunityIcons
+              name={lockIsLocked ? "lock" : "lock-open-variant"}
+              size={44}
+              color={lockIsLocked ? "#2ecc71" : "#f1c40f"}
+            />
+          </View>
+        </View>
+
+        <Text style={styles.lastOpened}>Last opened at 2:03 AM by Ayush</Text>
+      </View>
+
     </View>
   );
 }
@@ -13,11 +113,109 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 16,
+    paddingTop: 10,
   },
-  content: {
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  headerTitle: {
     fontSize: 22,
+    fontWeight: "700",
+    color: "#111",
+  },
+
+  previewWrap: {
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#e6e6e6",
+    marginBottom: 12,
+  },
+  previewImg: {
+    width: "100%",
+    height: 180,
+  },
+  previewLabel: {
+    position: "absolute",
+    left: 10,
+    top: 10,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  previewLabelText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 12,
+  },
+
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 12,
+    marginBottom: 10,
+  },
+  card: {
+    width: "48%",
+    backgroundColor: "#1f232a",
+    borderRadius: 14,
+    padding: 12,
+  },
+  cardTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 99,
+  },
+  cardTitle: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  lockSection: {
+    alignItems: "center",
+    marginTop: 6,
+  },
+  lockLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#111",
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  lockOuter: {
+    width: 120,
+    height: 120,
+    borderRadius: 999,
+    borderWidth: 10,
+    borderColor: "#eaeaea",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lockInner: {
+    width: 86,
+    height: 86,
+    borderRadius: 999,
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lastOpened: {
+    marginTop: 12,
+    color: "#666",
+    fontSize: 12,
   },
 });

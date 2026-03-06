@@ -1,28 +1,25 @@
-# Backend API (Firestore)
+# Backend (Firestore)
 
-Team backend for Firestore read/write testing.
 
-- Default port: `5050`
+- Port: `5050`
 - Firestore collection: `devices`
 
-## Team Quickstart
+## Quick Team Setup
 
-1. Install backend dependencies:
+1. Install backend packages:
 
 ```bash
 cd backend
 npm install
 ```
 
-2. Add Firebase credentials locally (not in git):
-- Option A (recommended): place key at `backend/serviceAccountKey.json`
-- Option B: set `FIREBASE_SERVICE_ACCOUNT_PATH` to a key file path
-- Option C: set `FIREBASE_SERVICE_ACCOUNT` to the full JSON string
+2. Set up your Firebase key locally:
+- Follow `Firebase Setup (First Time)` below
+- Put the key at `backend/serviceAccountKey.json`
 
 3. Start backend:
 
 ```bash
-cd backend
 node server.js
 ```
 
@@ -35,24 +32,37 @@ npm start
 
 5. In the app:
 - Open `Security` tab
-- Use `Firestore Test`
+- Use the `Firestore Test` box
 - `Save Mock Device` writes to Firestore
 - `Load Devices` reads from Firestore
 
-## Firestore Credential Notes
+## Firebase Setup (First Time)
 
-- Key files are gitignored by design.
-- Each teammate must set up credentials locally after pulling `main`.
-- Everyone can use the same Firebase project as long as their key has access to that project.
+Do this once on your machine:
+
+1. Open Firebase Console and choose our project.
+2. Go to `Project settings` (gear icon).
+3. Open `Service accounts`.
+4. Under Firebase Admin SDK, click `Generate new private key`.
+5. Download the JSON file.
+6. Move/copy it to `backend/serviceAccountKey.json`.
+
+Optional check:
+
+```bash
+git check-ignore -v backend/serviceAccountKey.json
+```
+
+If this shows a `.gitignore` rule, the key will not be committed.
 
 ## API Endpoints
 
-- `GET /health` checks backend-to-Firestore connectivity.
-- `POST /devices` creates a device document.
-- `GET /devices` lists device documents (newest first).
-- `GET /devices/:id` gets one device document by id.
+- `GET /health`
+- `POST /devices`
+- `GET /devices`
+- `GET /devices/:id`
 
-## Terminal API Test
+## Terminal Test (Optional)
 
 With backend running:
 
@@ -64,9 +74,8 @@ curl -s -X POST http://localhost:5050/devices \
 curl -s http://localhost:5050/devices
 ```
 
-## Troubleshooting
+## Notes
 
-- `Firebase service account key not found`:
-  add `backend/serviceAccountKey.json` or set `FIREBASE_SERVICE_ACCOUNT_PATH`.
-- Firestore auth/permission errors:
-  ensure the service account belongs to the correct Firebase project and has Firestore access.
+- Everyone has their own local key file.
+- If keys are from the same Firebase project, we all connect to the same Firestore database.
+- Never commit `backend/serviceAccountKey.json`.

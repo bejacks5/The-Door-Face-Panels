@@ -1,134 +1,72 @@
 # Backend API (Firestore)
 
-This backend is an Express API connected to Firebase Firestore.
+Team backend for Firestore read/write testing.
 
-Default server port: `5050`  
-Default collection: `devices`
+- Default port: `5050`
+- Firestore collection: `devices`
 
-## Prerequisites
+## Team Quickstart
 
-- Node.js 18+
-- A Firebase project with Firestore enabled
-- A Firebase Admin service account key
-
-## Install
+1. Install backend dependencies:
 
 ```bash
 cd backend
 npm install
 ```
 
-## Firebase Credentials
+2. Add Firebase credentials locally (not in git):
+- Option A (recommended): place key at `backend/serviceAccountKey.json`
+- Option B: set `FIREBASE_SERVICE_ACCOUNT_PATH` to a key file path
+- Option C: set `FIREBASE_SERVICE_ACCOUNT` to the full JSON string
 
-Use one of these options:
-
-1. `backend/serviceAccountKey.json` (default path)
-2. `FIREBASE_SERVICE_ACCOUNT_PATH` (absolute or relative file path)
-3. `FIREBASE_SERVICE_ACCOUNT` (full JSON string in an env var)
-
-Example with path:
-
-```bash
-FIREBASE_SERVICE_ACCOUNT_PATH=./serviceAccountKey.json node server.js
-```
-
-## Team Setup (Firestore)
-
-Service account key files are gitignored, so each teammate must configure credentials locally.
-
-1. In Firebase Console, open your project and create/download a Firebase Admin service account key JSON.
-2. Put the file at `backend/serviceAccountKey.json` (recommended for local dev), or set `FIREBASE_SERVICE_ACCOUNT_PATH` to wherever they store it.
-3. Start backend from `backend/`.
-
-All teammates can connect to the same Firestore project as long as they use credentials from that project.
-
-## Run
+3. Start backend:
 
 ```bash
 cd backend
 node server.js
 ```
 
-Optional custom port:
+4. Start frontend in a second terminal:
 
 ```bash
-PORT=5051 node server.js
-```
-
-## API Endpoints
-
-- `GET /health`  
-  Checks backend-to-Firestore connectivity.
-
-- `POST /devices`  
-  Creates a new device document.
-
-- `GET /devices`  
-  Lists all devices (newest first).
-
-- `GET /devices/:id`  
-  Gets a single device by document ID.
-
-## Quick Terminal Test
-
-Start server:
-
-```bash
-cd backend
-node server.js
-```
-
-In another terminal:
-
-```bash
-curl -s http://localhost:5050/health
-```
-
-```bash
-curl -s -X POST http://localhost:5050/devices \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Front Door Panel","status":"online","location":"Front Door"}'
-```
-
-```bash
-curl -s http://localhost:5050/devices
-```
-
-## Test With Frontend App
-
-Run backend and frontend at the same time in separate terminals.
-
-1. Start backend:
-
-```bash
-cd /Users/brycejackson/Desktop/The-Door-Face-Panels/backend
-node server.js
-```
-
-2. (Optional) confirm backend health:
-
-```bash
-curl -s http://localhost:5050/health
-```
-
-3. Start frontend:
-
-```bash
-cd /Users/brycejackson/Desktop/The-Door-Face-Panels/frontend
+cd frontend
 npm start
 ```
 
-4. In the app, open the `Security` tab and use the `Firestore Test` section:
-- Enter a device name (or leave blank)
-- Tap `Save Mock Device` to write a document to Firestore
-- Tap `Load Devices` to read documents from Firestore
+5. In the app:
+- Open `Security` tab
+- Use `Firestore Test`
+- `Save Mock Device` writes to Firestore
+- `Load Devices` reads from Firestore
 
-5. Verify in Firebase Console that documents are created in collection `devices`.
+## Firestore Credential Notes
 
-## Common Issues
+- Key files are gitignored by design.
+- Each teammate must set up credentials locally after pulling `main`.
+- Everyone can use the same Firebase project as long as their key has access to that project.
 
-- `Firebase service account key not found`  
-  Add `backend/serviceAccountKey.json` or set `FIREBASE_SERVICE_ACCOUNT_PATH` before starting the server.
+## API Endpoints
 
-- Firestore permission/auth errors  
-  Make sure the service account belongs to the same Firebase project and Firestore is enabled.
+- `GET /health` checks backend-to-Firestore connectivity.
+- `POST /devices` creates a device document.
+- `GET /devices` lists device documents (newest first).
+- `GET /devices/:id` gets one device document by id.
+
+## Terminal API Test
+
+With backend running:
+
+```bash
+curl -s http://localhost:5050/health
+curl -s -X POST http://localhost:5050/devices \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Front Door Panel","status":"online","location":"Front Door"}'
+curl -s http://localhost:5050/devices
+```
+
+## Troubleshooting
+
+- `Firebase service account key not found`:
+  add `backend/serviceAccountKey.json` or set `FIREBASE_SERVICE_ACCOUNT_PATH`.
+- Firestore auth/permission errors:
+  ensure the service account belongs to the correct Firebase project and has Firestore access.

@@ -21,3 +21,8 @@ Thumbs.db
 # Build output
 dist/
 build/
+
+#key for database
+serviceAccountKey.json
+backend/serviceAccountKey.json
+backend/*firebase-adminsdk*.json

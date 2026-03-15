@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Image, ScrollView, Modal, Switch } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -19,7 +19,12 @@ type PanelSettings = {
   doorbell: boolean;
   packageMessage: boolean;
   greetingMessage: boolean;
-}
+};
+
+type NotificationData = {
+  visible: boolean;
+  message: string;
+};
 
 function pick<T>(arr: T[]) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -65,19 +70,17 @@ function StatusCard({
 function FrontPanel({
   settings,
 }: {
-  settings: PanelSettings
+  settings: PanelSettings;
 }) {
   return (
     <View style={styles.frontPanelOverlay}>
       <View style={styles.frontPanelTop}>
-        {/* Camera */}
         {settings.camera && (
           <View>
             <Text>Camera is active !</Text>
           </View>
         )}
 
-        {/* Doorbell */}
         {settings.doorbell && (
           <View>
             <Text>Doorbell is active !</Text>
@@ -86,14 +89,12 @@ function FrontPanel({
       </View>
 
       <View style={styles.frontPanelCenter}>
-        {/* Package Message */}
         {settings.packageMessage && (
           <View>
             <Text>Package Message: Placeholder</Text>
           </View>
         )}
 
-        {/* Greeting Message */}
         {settings.greetingMessage && (
           <View>
             <Text>Greeting Message: Placeholder</Text>
@@ -108,40 +109,41 @@ function PanelSettingsEditor({
   settings,
   newSettings,
 }: {
-  settings: PanelSettings,
+  settings: PanelSettings;
   newSettings: React.Dispatch<React.SetStateAction<PanelSettings>>;
 }) {
   return (
     <View>
       {Object.entries(settings).map(([key, value]) => (
-        <View 
-          key={key}
-          style={styles.frontPanelEditorList}
-        > 
+        <View key={key} style={styles.frontPanelEditorList}>
           <Switch
             value={value}
             onValueChange={(newValue) =>
               newSettings((prev) => ({
                 ...prev,
-                [key]: newValue
+                [key]: newValue,
               }))
-          }/>
+            }
+          />
 
           <Text>
             {key
-              .replace(/([A-Z])/g, ' $1')
+              .replace(/([A-Z])/g, " $1")
               .toLowerCase()
-              .replace(/^./, s => s.toUpperCase())
-            }
+              .replace(/^./, (s) => s.toUpperCase())}
           </Text>
         </View>
       ))}
     </View>
-  )
+  );
 }
 
 export default function Index() {
   const [status, setStatus] = useState<Status>(() => randomStatus());
+  const [notification, setNotification] = useState<NotificationData>({
+    visible: false,
+    message: "",
+  });
   const lockIsLocked = useMemo(() => status.door === "Locked", [status.door]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [panelSettings, setPanelSettings] = useState<PanelSettings>({
@@ -152,28 +154,61 @@ export default function Index() {
   });
   const [tempPanelSettings, setTempPanelSettings] = useState<PanelSettings>(panelSettings);
 
+  const showNotification = (message: string) => {
+    setNotification({
+      visible: true,
+      message,
+    });
+  };
+
+  useEffect(() => {
+    if (!notification.visible) return;
+
+    const timer = setTimeout(() => {
+      setNotification((prev) => ({
+        ...prev,
+        visible: false,
+      }));
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [notification.visible]);
+
   const toggleLock = () => {
-    setStatus((prev) => ({
-      ...prev,
-      door: prev.door === "Locked" ? "Unlocked" : "Locked",
-    }));
+    setStatus((prev) => {
+      const nextDoor = prev.door === "Locked" ? "Unlocked" : "Locked";
+
+      showNotification(
+        nextDoor === "Locked"
+          ? "Door locked successfully"
+          : "Door unlocked successfully"
+      );
+
+      return {
+        ...prev,
+        door: nextDoor,
+      };
+    });
   };
 
   return (
-    <ScrollView style={styles.container}
-      contentContainerStyle={{paddingBottom: 40}}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-
-      {/* Header */}
       <View style={styles.headerRow}>
         <Text style={styles.headerTitle}>My Home</Text>
-        <Pressable onPress={() => setStatus(randomStatus())}>
+        <Pressable
+          onPress={() => {
+            setStatus(randomStatus());
+            showNotification("System status refreshed");
+          }}
+        >
           <Ionicons name="person-circle-outline" size={28} color="#111" />
         </Pressable>
       </View>
 
-      {/* Camera Preview */}
       <View style={styles.previewWrap}>
         <Image
           source={{ uri: "https://via.placeholder.com/1200x700.png?text=Front+Door+Camera" }}
@@ -184,23 +219,23 @@ export default function Index() {
         </View>
       </View>
 
-      {/* Front Panel Preview */}
       <View style={styles.previewWrap}>
-        <FrontPanel settings={panelSettings}/>
+        <FrontPanel settings={panelSettings} />
         <View style={styles.previewLabel}>
           <Text style={styles.previewLabelText}>Front Panel Preview</Text>
         </View>
         <View style={styles.previewLabelRight}>
-          <Pressable onPress={() => {
-            setTempPanelSettings(panelSettings);
-            setEditModalVisible(true);
-          }}>
+          <Pressable
+            onPress={() => {
+              setTempPanelSettings(panelSettings);
+              setEditModalVisible(true);
+            }}
+          >
             <Text style={styles.previewLabelText}>Edit</Text>
           </Pressable>
         </View>
       </View>
 
-      {/* Status Cards */}
       <View style={styles.grid}>
         <StatusCard title={`Door ${status.door}`} dot={dotColor("door", status.door)} />
         <StatusCard title={`Camera ${status.camera}`} dot={dotColor("camera", status.camera)} />
@@ -208,7 +243,6 @@ export default function Index() {
         <StatusCard title={`${status.temp} Temp`} dot={dotColor("temp", status.temp)} />
       </View>
 
-      {/* Lock Section */}
       <View style={styles.lockSection}>
         <Text style={styles.lockLabel}>{lockIsLocked ? "LOCKED" : "UNLOCKED"}</Text>
 
@@ -227,44 +261,61 @@ export default function Index() {
         <Text style={styles.lastOpened}>Last opened at 2:03 AM by Ayush</Text>
       </View>
 
-      {/* Front Door Panel Control */}
-      <Modal
-        visible={editModalVisible}
-        animationType="slide"
-        transparent={true}
-      >
+      <View style={styles.mockButtonRow}>
+        <Pressable
+          style={styles.mockButton}
+          onPress={() => showNotification("Doorbell pressed")}
+        >
+          <Text style={styles.mockButtonText}>Trigger Notification</Text>
+        </Pressable>
+      </View>
+
+      <Modal visible={editModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-            <Text style={styles.headerTitle}>Front Panel Control</Text>
+          <Text style={styles.headerTitle}>Front Panel Control</Text>
 
-            {/* Front Panel Display*/}
-            <FrontPanel settings={tempPanelSettings}></FrontPanel>
+          <FrontPanel settings={tempPanelSettings} />
 
-            {/* Front Panel Content Control List */}
-            <PanelSettingsEditor 
-              settings={tempPanelSettings}
-              newSettings={setTempPanelSettings}
-            />
+          <PanelSettingsEditor
+            settings={tempPanelSettings}
+            newSettings={setTempPanelSettings}
+          />
 
-            {/* Save Button */}
-            <Pressable
-              style={styles.modalSaveButton}
-              onPress={() => {
-                setPanelSettings(tempPanelSettings);
-                setEditModalVisible(false);
-            }}>
-              <Text style={styles.modalSaveText}>Save</Text>
-            </Pressable>
+          <Pressable
+            style={styles.modalSaveButton}
+            onPress={() => {
+              setPanelSettings(tempPanelSettings);
+              setEditModalVisible(false);
+              showNotification("Front panel settings saved");
+            }}
+          >
+            <Text style={styles.modalSaveText}>Save</Text>
+          </Pressable>
 
-            {/* Cancel Button*/}
-            <Pressable 
-              style={styles.modalCancelButton}
-              onPress={() => setEditModalVisible(false)}
-            >
-              <Text style={styles.modalCancelText}>Cancel</Text>
-            </Pressable>
+          <Pressable
+            style={styles.modalCancelButton}
+            onPress={() => setEditModalVisible(false)}
+          >
+            <Text style={styles.modalCancelText}>Cancel</Text>
+          </Pressable>
         </View>
       </Modal>
 
+      {notification.visible && (
+        <View style={styles.notificationBanner}>
+          <Text style={styles.notificationText}>{notification.message}</Text>
+          <Pressable
+            onPress={() =>
+              setNotification((prev) => ({
+                ...prev,
+                visible: false,
+              }))
+            }
+          >
+            <Ionicons name="close" size={20} color="#fff" />
+          </Pressable>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -276,7 +327,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
   },
-
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -288,7 +338,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111",
   },
-
   previewWrap: {
     borderRadius: 14,
     overflow: "hidden",
@@ -323,7 +372,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 12,
   },
-
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -352,7 +400,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
   },
-
   lockSection: {
     alignItems: "center",
     marginTop: 6,
@@ -440,5 +487,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingVertical: 8,
+  },
+  mockButtonRow: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  mockButton: {
+    backgroundColor: "#4a6cb7",
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  mockButtonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+  },
+  notificationBanner: {
+    position: "absolute",
+    top: 60,
+    left: 16,
+    right: 16,
+    backgroundColor: "#1f232a",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    zIndex: 9999,
+    elevation: 8,
+  },
+  notificationText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    flex: 1,
+    marginRight: 10,
   },
 });

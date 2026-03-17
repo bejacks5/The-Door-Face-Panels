@@ -153,7 +153,119 @@ export default function Index() {
     greetingMessage: false,
   });
   const [tempPanelSettings, setTempPanelSettings] = useState<PanelSettings>(panelSettings);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const cameraRef = useRef<CameraView | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [cameraActive, setCameraActive] = useState(false);
+  
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
+  const turnOnCamera = async () => { 
+    // function for turning on the web camera
+  
+      if (Platform.OS === "web") {
+        try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+  
+        setStream(mediaStream);
+        } catch (err) {
+          Alert.alert("Camera error.");
+        }
+      }
+      if (!permission?.granted) {
+        const reuslt = await requestPermission();
+        if (!reuslt.granted) {
+          Alert.alert("Camera permission denied");
+          return;
+        }
+        setCameraActive(true);
+      }  
+  }
+
+  const captureFrame = (video : HTMLVideoElement) => {
+    // function that captures a frame/image from a video
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  
+    const ctx = canvas.getContext("2d");
+    ctx?.drawImage(video, 0, 0);
+    
+    return canvas.toDataURL("image/jpeg");
+  }
+
+  const captureImages = async () => {
+  // function that captures 5 frames/images from a video
+    if (Platform.OS === "web") {
+      const frames: string[] = [];
+  
+      for(let i = 0; i < 5; i++) {
+        frames.push(captureFrame(videoRef.current!));
+        await new Promise((r) => setTimeout(r, 500)); // wait a bit so that we don't use the same frames
+      }
+  
+      return frames;
+    }
+    
+    // mobile
+    const frames: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const photo = await cameraRef.current!.takePictureAsync({ base64: true, quality: 0.7});
+      frames.push(`data:image/jpeg;base64,${photo.base64}`); // we need to have base 64 because the backend deals with this type only
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    return frames;
+  }
+
+  const registerUser = async () => {
+    const images = await captureImages();
+
+    const res = await fetch(`${API_BASE_URL}/face/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: "Ayush",
+        images,
+      }),
+    });
+
+    const data = await res.json();
+    console.log(data);
+  }
+
+  const authenticateFace = async () => {
+    const images = await captureImages();
+  
+    const res = await fetch(`${API_BASE_URL}/face/authenticate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ images }),
+    });
+  
+    const data = await res.json();
+    
+    if (data.authenticated) {
+      Alert.alert(`Authenticated as ${data.name}`);
+      console.log("Successfully authenticated.");
+    } else {
+      Alert.alert(`Failed to authenticate: ${data.message}`);
+      console.log("Failed to authenticate.");
+    }
+    console.log(data);
+  }
+  
   const showNotification = (message: string) => {
     setNotification({
       visible: true,
@@ -210,13 +322,63 @@ export default function Index() {
       </View>
 
       <View style={styles.previewWrap}>
-        <Image
+        {stream && Platform.OS === "web" ? (  // web cam
+          <video
+            autoPlay
+            playsInline
+            ref={videoRef}
+            style={styles.cameraPreview}
+          />
+        ) : (cameraActive ? (                 // mobile cam
+          <CameraView
+            ref={cameraRef}
+            style={styles.previewImg}
+            facing="front"
+          />
+        ) : (
+          <Image
           source={{ uri: "https://via.placeholder.com/1200x700.png?text=Front+Door+Camera" }}
           style={styles.previewImg}
         />
+        ))}
         <View style={styles.previewLabel}>
           <Text style={styles.previewLabelText}>Front Door Camera</Text>
         </View>
+        <View style={styles.previewLabelRight}>
+          <Pressable style={styles.previewButton} onPress={() => turnOnCamera()}>
+            <Text style={styles.previewLabelText}>Turn on Camera</Text>            
+          </Pressable>
+
+          <Pressable style={styles.previewButton} onPress={() => {
+            if (Platform.OS === "web") {
+              setStream(null)
+            } else {
+              setCameraActive(false);
+            }
+          }}>
+            <Text style={styles.previewLabelText}>Turn off Camera</Text>
+          </Pressable>
+
+          <Pressable 
+            style={styles.previewButton} 
+            onPress={() => {
+              if (videoRef.current || cameraActive) {
+                authenticateFace();
+              }
+            }}>
+            <Text style={styles.previewLabelText}>Authenticate</Text>
+          </Pressable>
+
+          <Pressable 
+            style={styles.previewButton} 
+            onPress={() => {
+              if (videoRef.current || cameraActive) {
+                registerUser();
+              }
+            }}>
+            <Text style={styles.previewLabelText}>Add User</Text>
+          </Pressable>
+        </View>       
       </View>
 
       <View style={styles.previewWrap}>
@@ -362,15 +524,20 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 10,
     top: 10,
+    flexDirection: "column",
+    gap: 6,
+  },
+  previewLabelText: {
+    textAlign: "center",
+    color: "white",
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  previewButton: {
     backgroundColor: "rgba(0,0,0,0.45)",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
-  },
-  previewLabelText: {
-    color: "white",
-    fontWeight: "600",
-    fontSize: 12,
   },
   grid: {
     flexDirection: "row",

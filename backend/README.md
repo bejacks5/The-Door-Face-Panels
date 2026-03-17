@@ -2,7 +2,7 @@
 
 
 - Port: `5050`
-- Firestore collection: `devices`
+- Firestore collection: `devices`, `faces`
 
 ## Quick Team Setup
 
@@ -36,6 +36,25 @@ npm start
 - `Save Mock Device` writes to Firestore
 - `Load Devices` reads from Firestore
 
+## Setup for Face Authentication
+- The backend uses a child python process to generate embeddings using the DeepFace library
+- We need to install deepface and tf-keras, but those require an earlier version of python (3.11) so we will get that working with a virtual environment
+- Install Python version 3.11, visit https://www.python.org/downloads/release/python-3119/
+- Windows:
+  - cd into backend directory
+  - run 'py -3.11 -m venv python-venv' to create a python-venv folder
+  - run 'python-venv\Scripts\activate' to activate the python virtual environment
+  - run 'pip install deepface tf-keras' to install the required libraries
+- Mac/Linux:
+  - run 'python3.11 -m venv python-venv' to create a python-venv folder
+  - run 'source python-venv/bin/activate' to activate the python virtual environment
+  - run 'pip install deepface tf-keras' to install the required libraries
+- Download facenet_weights.h5 as the auto-download for the model might fail
+  - https://github.com/serengil/deepface_models/releases/download/v1.0/facenet_weights.h5
+  - Windows: place the file in C:\Users\<username>\.deepface\weights\facenet_weights.h5
+  - Mac/Linux: place the file in ~/.deepface/weights/facenet_weights.h5
+### Note: Make sure the python-venv file is inside the backend directory and that python-venv/ is in the git ignore !
+
 ## Firebase Setup (First Time)
 
 Do this once on your machine:
@@ -61,6 +80,8 @@ If this shows a `.gitignore` rule, the key will not be committed.
 - `POST /devices`
 - `GET /devices`
 - `GET /devices/:id`
+- `POST /face/register`
+- `POST /face/authenticate`
 
 ## Terminal Test (Optional)
 
